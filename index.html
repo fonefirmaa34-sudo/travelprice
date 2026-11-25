@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>COMPARATIVO DE DESLOCAMENTO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE work tool: Comparativo de deslocamento, a trip-cost calculator, exact and calm
+   IDEA a fuel-pump / charger display: the big running total in R$, the litres or kWh beside it
+   PICTURE the live result drawn large, plus a ranked bar list of all 30 cars at the same settings
+   COLOUR white ground, Mercosul blue #0039a6 band, EV green, hybrid amber, combustion red (same as the ranking page)
+   TYPE Barlow Condensed 700 + Barlow
+   LAYOUT controls and result side by side on laptop; three vehicle lists below; comparison last. Phone: result sticky on top */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0d1117);--ink:light-dark(#111827,#e8ecf2);--mute:light-dark(#4b5563,#a3acb9);--rule:light-dark(#dfe3ea,#283040);--panel:light-dark(#f5f7fa,#151b25);--blue:#0039a6;--ev:light-dark(#0a8f5a,#33c38a);--hy:light-dark(#c77700,#f0a531);--co:light-dark(#b3262e,#f0656c);--focus:light-dark(#0039a6,#8fb1ff)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(22px,3.5vw,48px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+header{background:var(--blue);color:#fff}
+h1{font:700 clamp(32px,4.4vw,48px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 6px;text-wrap:balance}
+header p{margin:0;color:#dbe5ff;max-width:70ch}
+h2{font:700 26px/1.1 "Barlow Condensed",sans-serif;margin:0 0 10px}
+.top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:20px;align-items:stretch}
+@media(max-width:860px){.top{grid-template-columns:minmax(0,1fr)}}
+.box{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px}
+.ctl{margin-bottom:16px}
+.ctl>label,.lbl{display:block;font-weight:600;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 18px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+button:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.row{display:flex;align-items:center;gap:12px}
+input[type=range]{flex:1;accent-color:var(--blue);height:44px}
+.kmv{font:700 26px "Barlow Condensed",sans-serif;white-space:nowrap;min-width:5.5em;text-align:right}
+.prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media(max-width:480px){.prices{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.prices label{font-size:14px;color:var(--mute);display:block;margin-bottom:4px}
+.money{display:flex;align-items:center;border:1px solid var(--rule);border-radius:8px;background:var(--bg);padding:0 10px;min-height:44px}
+.money span{color:var(--mute);font-size:14px;white-space:nowrap}
+.money input{border:0;background:transparent;color:var(--ink);font:16px Barlow,sans-serif;width:100%;padding:8px 6px;outline:none}
+.res{display:flex;flex-direction:column;gap:10px;border-top:6px solid var(--c,var(--blue))}
+.res .who{font:700 24px/1.15 "Barlow Condensed",sans-serif}
+.res .empty{color:var(--mute)}
+.big{font:700 clamp(48px,7vw,76px)/1 "Barlow Condensed",sans-serif;white-space:nowrap}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9em,1fr));gap:10px}
+.facts div{border-top:1px solid var(--rule);padding-top:6px}
+.facts b{display:block;font:700 22px "Barlow Condensed",sans-serif;white-space:nowrap}
+.facts span{font-size:14px;color:var(--mute)}
+.note{font-size:14px;color:var(--mute);margin:0}
+.lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media(max-width:900px){.lists{grid-template-columns:minmax(0,1fr)}}
+.lists h3{font:700 22px "Barlow Condensed",sans-serif;margin:0 0 8px;color:var(--c)}
+.ev{--c:var(--ev)}.hy{--c:var(--hy)}.co{--c:var(--co)}
+.car{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;margin-bottom:6px;cursor:pointer;min-height:44px}
+.car small{color:var(--mute);font-size:13px;grid-column:1/3}
+.car .t{font-size:13px;color:var(--c);border:1px solid currentColor;border-radius:4px;padding:0 5px;align-self:center;white-space:nowrap}
+.car[aria-checked=true]{border:2px solid var(--c);background:color-mix(in srgb,var(--c) 12%,var(--bg))}
+.car:disabled{opacity:.38;cursor:not-allowed}
+.hint{font-size:14px;color:var(--mute);margin:0 0 12px}
+.cmp li{display:grid;grid-template-columns:minmax(8em,15em) minmax(0,1fr) 6.5em;gap:10px;align-items:center;padding:4px 0}
+.cmp{list-style:none;margin:0;padding:0}
+.cmp .bar{height:12px;border-radius:6px;background:var(--rule);overflow:hidden}
+.cmp .bar i{display:block;height:100%;background:var(--c);border-radius:6px;transition:width .35s}
+.cmp .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.cmp .me{font-weight:700}
+.cmp .me .nm::after{content:" ◀";color:var(--c)}
+@media(max-width:560px){.cmp li{grid-template-columns:minmax(0,1fr) 5.5em}.cmp .bar{grid-column:1/3;grid-row:2}}
+@media(prefers-reduced-motion:reduce){.cmp .bar i{transition:none}}
+@media(max-width:860px){.res{position:sticky;top:0;z-index:2}}
+.meth p{max-width:75ch;margin:0 0 10px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:6px 8px;border-bottom:1px solid var(--rule);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+a{color:var(--focus)}
+footer{color:var(--mute);font-size:14px;border-top:1px solid var(--rule)}
+</style></head><body>
+<header class="band"><div class="wrap">
+<h1>Quanto custa rodar com cada um dos 30 carros mais vendidos</h1>
+<p>Escolha um veículo, a quilometragem e o tipo de trajeto. Consumo oficial do Inmetro (PBEV 2026) sempre que disponível; preços de energia e combustível são editáveis.</p>
+</div></header>
+<main class="band"><div class="wrap">
+<div class="top">
+<div class="box">
+<div class="ctl"><span class="lbl">Trajeto</span><div class="seg" id="modo"><button type="button" id="m-cid" aria-pressed="true" data-v="c">Cidade</button><button type="button" id="m-est" aria-pressed="false" data-v="r">Estrada</button></div></div>
+<div class="ctl"><label for="km">Quilometragem rodada</label><div class="row"><input type="range" id="km" min="10" max="5000" step="10" value="1000"><span class="kmv" id="kmv">1.000 km</span></div></div>
+<div class="ctl"><span class="lbl">Preços</span><div class="prices">
+<div><label for="pk">Energia (kWh)</label><div class="money"><span>R$</span><input id="pk" type="number" inputmode="decimal" step="0.01" min="0" value="0.95"></div></div>
+<div><label for="pg">Gasolina (litro)</label><div class="money"><span>R$</span><input id="pg" type="number" inputmode="decimal" step="0.01" min="0" value="6.30"></div></div>
+<div><label for="pe">Etanol (litro)</label><div class="money"><span>R$</span><input id="pe" type="number" inputmode="decimal" step="0.01" min="0" value="4.30"></div></div>
+</div><p class="note" style="margin-top:6px">Valores de exemplo; troque pelos da sua conta de luz e do seu posto.</p></div>
+<div class="ctl"><span class="lbl">Combustível dos carros flex</span><div class="seg" id="comb"><button type="button" id="c-g" aria-pressed="true" data-v="g">Gasolina</button><button type="button" id="c-e" aria-pressed="false" data-v="e">Etanol</button></div></div>
+<div class="ctl" id="phevbox"><label for="pel">Híbridos plug-in: parte rodada só na bateria</label><div class="row"><input type="range" id="pel" min="0" max="100" step="5" value="70"><span class="kmv" id="pelv">70%</span></div><p class="note">100% = sempre recarrega na tomada e roda no elétrico; 0% = nunca recarrega (bateria vazia, só gasolina).</p></div>
+</div>
+<div class="box res" id="res" aria-live="polite"></div>
+</div>
+<h2 style="margin-top:28px">Escolha um veículo</h2>
+<p class="hint" id="hint">Só um pode ficar selecionado. Toque nele de novo para liberar os outros.</p>
+<div class="lists" id="lists"></div>
+<h2 style="margin-top:28px" id="cmpt">Os 30 nas mesmas condições</h2>
+<p class="hint" id="cmps"></p>
+<ul class="cmp" id="cmp"></ul>
+</div></main>
+<section class="band meth" style="padding-top:0"><div class="wrap">
+<h2>De onde vêm os consumos</h2>
+<p><b>Combustão e híbridos plenos (HEV):</b> km/l de cidade e estrada da tabela PBEV 2026 do Inmetro, via <a href="https://www.cnnbrasil.com.br/auto/qual-consumo-medio-dos-10-carros-mais-vendidos-do-brasil-veja-lista/">CNN Brasil</a>, <a href="https://mundodoautomovelparapcd.com.br/os-15-carros-mais-economicos-do-brasil-com-etanol-em-2026-hibridos-dominam-o-ranking-do-inmetro/">Mundo do Automóvel para PCD</a> e <a href="https://recarregados.com/blog/melhores-hibridos-2026">Recarregados</a>. Onde só havia o número da gasolina, o etanol foi estimado em 70% dele (a razão típica da tabela) e está marcado como estimativa.</p>
+<p><b>Elétricos:</b> o Inmetro publica um consumo combinado em MJ/km (via <a href="https://mobilidadeeletrica.com.br/consumo-de-veiculos-eletricos">Mobilidade Elétrica</a>), convertido para kWh/100 km (÷ 3,6). Para separar cidade e estrada usei −8% na cidade e +12% na estrada, porque elétrico gasta menos no anda e para e mais em velocidade constante. Somei 10% de perda na recarga (da tomada para a bateria).</p>
+<p><b>Híbridos plug-in (PHEV):</b> km/l com bateria descarregada (Inmetro: <a href="https://autopapo.com.br/noticia/byd-king-consumo/">BYD King</a>; Motor1 via Recarregados: Song Pro; <a href="https://motorshow.com.br/jaecoo-7-phev-2026-avaliacao">Jaecoo 7</a> e <a href="https://motorshow.com.br/avaliacao-geely-ex5-em-i">Geely EX5 EM-i</a> via Motor Show). Consumo elétrico do Inmetro (BYD) ou medido em teste (Jaecoo, Geely). O Jetour T2 não tem número publicado que eu tenha achado: os dados dele são estimativa de um SUV PHEV desse porte.</p>
+<p><b>Versões:</b> uma versão representativa por modelo, listada abaixo do nome. O Haval H6 usa a versão HEV flex; as plug-in PHEV gastam diferente. Consumo real varia com trânsito, carga, ar-condicionado e estilo de direção.</p>
+<details><summary>Tabela completa dos consumos usados</summary><div class="scroll" id="tab"></div></details>
+</div></section>
+<footer class="band"><div class="wrap">Lista de veículos: os 10 mais vendidos de cada motorização de maio a outubro de 2026. Levantamento de 24 de novembro de 2026.</div></footer>
+<script>
+{
+// t: ev | hev | phev | ice. g/e = km/l gasolina/etanol [cidade, estrada]; k = kWh/100 km [cidade, estrada] na bateria; est = estimativa
+const ev=(n,v,mj)=>{const c=mj/3.6*100;return{n,v,t:'ev',k:[+(c*.92).toFixed(1),+(c*1.12).toFixed(1)],est:'cidade/estrada derivados do combinado'}};
+const L=[
+{id:'ev',h:'Elétricos',cls:'ev',cars:[ev('BYD Dolphin Mini','GS',0.41),ev('BYD Dolphin','GS 180EV',0.42),ev('Geely EX2','Pro',0.39),ev('GAC Aion UT','Premium',0.51),ev('Chevrolet Spark EUV','Activ',0.50),ev('GWM Ora 5','5',0.49),ev('BYD Yuan Pro','GS',0.51),ev('Geely EX5','Pro',0.42),ev('MG4','64 kWh',0.50),ev('GWM Ora 03','BEV58',0.51)]},
+{id:'hy',h:'Híbridos',cls:'hy',cars:[
+{n:'BYD Song Pro',v:'GL DM-i Flex',t:'phev',g:[16.0,13.9],e:[12.1,10.7],k:[14.0,17.0]},
+{n:'GWM Haval H6',v:'HEV2 Flex',t:'hev',g:[15.8,13.0],e:[10.2,9.0]},
+{n:'Omoda 5',v:'HEV',t:'hev',g:[15.1,13.5],est:'estrada estimada'},
+{n:'Jaecoo 7',v:'SHS PHEV',t:'phev',g:[15.1,13.5],k:[16.0,19.0],est:'kWh de teste'},
+{n:'BYD King',v:'GS DM-i',t:'phev',g:[16.8,14.7],k:[12.5,15.2]},
+{n:'Toyota Yaris Cross',v:'Hybrid Flex',t:'hev',g:[17.9,15.3],e:[13.2,10.7]},
+{n:'Geely EX5 EM-i',v:'Pro',t:'phev',g:[14.8,13.1],k:[15.8,18.9],est:'kWh de teste'},
+{n:'Toyota Corolla Cross',v:'Hybrid Flex',t:'hev',g:[16.6,14.0],e:[11.6,9.9]},
+{n:'Toyota Corolla',v:'Altis Hybrid Flex',t:'hev',g:[17.5,15.2],e:[12.5,10.7]},
+{n:'Jetour T2',v:'i-DM PHEV',t:'phev',g:[11.5,11.0],k:[20.0,23.0],est:'tudo estimado'}]},
+{id:'co',h:'Combustão',cls:'co',cars:[
+{n:'Fiat Strada',v:'1.3 Firefly',t:'ice',g:[13.0,14.7],e:[9.1,10.3],est:'etanol estimado'},
+{n:'Volkswagen Polo',v:'1.0',t:'ice',g:[13.5,15.7],e:[9.3,10.9]},
+{n:'Volkswagen Tera',v:'1.0',t:'ice',g:[12.9,15.0],e:[9.0,10.5],est:'etanol estimado'},
+{n:'Fiat Argo',v:'1.0',t:'ice',g:[13.6,14.5],e:[9.4,10.4]},
+{n:'Volkswagen T-Cross',v:'1.0 TSI',t:'ice',g:[12.9,14.9],e:[9.0,10.4],est:'etanol estimado'},
+{n:'Chevrolet Onix',v:'1.0 Turbo MT',t:'ice',g:[13.7,17.7],e:[9.8,12.4]},
+{n:'Hyundai Creta',v:'1.0 TGDI',t:'ice',g:[12.0,12.7],e:[8.4,8.9],est:'etanol estimado'},
+{n:'Hyundai HB20',v:'1.0',t:'ice',g:[13.3,15.4],e:[9.9,10.7]},
+{n:'Fiat Mobi',v:'Like 1.0',t:'ice',g:[14.5,15.8],e:[10.1,11.1]},
+{n:'Fiat Pulse',v:'Turbo Hybrid (MHEV)',t:'ice',g:[13.3,14.6],e:[9.3,10.2],est:'gasolina estimada'}]}];
+const ALL=L.flatMap(g=>g.cars.map(c=>({...c,cls:g.cls})));
+ALL.forEach((c,i)=>c.id='v'+i);
+const TL={ev:'BEV',hev:'HEV',phev:'PHEV',ice:'Flex'};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const n1=v=>v.toLocaleString('pt-BR',{maximumFractionDigits:1});
+const LOSS=1.10;
+let S={sel:'v0',m:'c',f:'g'};
+try{const s=JSON.parse(localStorage.getItem('custo-desloc')||'null');if(s)Object.assign(S,s)}catch(e){}
+const num=id=>Math.max(0,parseFloat($(id).value)||0);
+function cost(c){
+  const km=+$('km').value,i=S.m==='c'?0:1,pk=num('pk'),pg=num('pg'),pe=num('pe'),p=+$('pel').value/100;
+  const useE=S.f==='e'&&c.e;const kml=c.g?(useE?c.e[i]:c.g[i]):0;const pf=useE?pe:pg;const fuel=useE?'etanol':'gasolina';
+  if(c.t==='ev'){const kwh=km*c.k[i]/100*LOSS;return{tot:kwh*pk,kwh,l:0,fuel:'',kml:0,kw:c.k[i]}}
+  if(c.t==='phev'){const kwh=km*p*c.k[i]/100*LOSS,l=km*(1-p)/kml;return{tot:kwh*pk+l*pf,kwh,l,fuel,kml,kw:c.k[i]}}
+  const l=km/kml;return{tot:l*pf,kwh:0,l,fuel,kml}
+}
+function lists(){
+  $('lists').innerHTML=L.map(g=>`<section class="${g.cls}"><h3>${esc(g.h)}</h3><div role="radiogroup" aria-label="${esc(g.h)}">${g.cars.map(c=>{const id=ALL.find(a=>a.n===c.n).id;const on=S.sel===id,dis=S.sel&&!on;return `<button type="button" role="radio" class="car" data-id="${id}" aria-checked="${on}" ${dis?'disabled':''}><span>${esc(c.n)}</span><span class="t">${TL[c.t]}</span><small>${esc(c.v)}${c.est?' · '+esc(c.est):''}</small></button>`}).join('')}</div></section>`).join('');
+  $('hint').textContent=S.sel?'Os outros estão bloqueados. Toque no selecionado de novo para trocar de veículo.':'Nenhum selecionado. Escolha um veículo de qualquer lista.';
+}
+function render(){
+  const km=+$('km').value;$('kmv').textContent=km.toLocaleString('pt-BR')+' km';$('pelv').textContent=$('pel').value+'%';
+  for(const b of $('modo').children)b.setAttribute('aria-pressed',b.dataset.v===S.m);
+  for(const b of $('comb').children)b.setAttribute('aria-pressed',b.dataset.v===S.f);
+  const c=ALL.find(a=>a.id===S.sel),r=$('res');
+  if(!c){r.style.removeProperty('--c');r.innerHTML='<div class="who">Nenhum veículo selecionado</div><p class="empty">Escolha um carro nas listas abaixo para ver o custo.</p>'}
+  else{
+    const x=cost(c),mode=S.m==='c'?'cidade':'estrada';r.style.setProperty('--c',`var(--${c.cls})`);
+    const f=[[brl(x.tot/km*100),'a cada 100 km']];
+    if(x.kwh)f.push([n1(x.kwh)+' kWh','energia da tomada']);
+    if(x.l)f.push([n1(x.l)+' L',x.fuel]);
+    if(x.kw)f.push([n1(x.kw)+' kWh/100 km','consumo na bateria, '+mode]);
+    if(x.kml)f.push([n1(x.kml)+' km/l',x.fuel+', '+mode]);
+    let nt='';
+    if(c.t==='phev')nt=`${$('pel').value}% do trajeto no elétrico e o resto a ${x.fuel}.`;
+    else if(c.t==='ev')nt='Inclui 10% de perda na recarga.';
+    if(S.f==='e'&&!c.e&&c.t!=='ev')nt+=' Este modelo não é flex: calculado com gasolina.';
+    r.innerHTML=`<div class="who">${esc(c.n)} <span class="note">${esc(c.v)} · ${TL[c.t]}</span></div><div class="big">${brl(x.tot)}</div><p class="note">para ${km.toLocaleString('pt-BR')} km na ${mode}</p><div class="facts">${f.map(a=>`<div><b>${esc(a[0])}</b><span>${esc(a[1])}</span></div>`).join('')}</div>${nt?`<p class="note">${esc(nt.trim())}</p>`:''}`;
+  }
+  const rows=ALL.map(a=>({a,v:cost(a).tot})).sort((p,q)=>p.v-q.v),mx=rows[rows.length-1].v||1;
+  $('cmps').textContent=`${km.toLocaleString('pt-BR')} km na ${S.m==='c'?'cidade':'estrada'}, flex com ${S.f==='g'?'gasolina':'etanol'}, plug-in com ${$('pel').value}% no elétrico. Do mais barato ao mais caro.`;
+  $('cmp').innerHTML=rows.map(o=>`<li class="${o.a.cls}${o.a.id===S.sel?' me':''}"><span class="nm">${esc(o.a.n)}</span><span class="bar"><i style="width:${(o.v/mx*100).toFixed(1)}%"></i></span><span class="v">${brl(o.v)}</span></li>`).join('');
+  try{localStorage.setItem('custo-desloc',JSON.stringify(S))}catch(e){}
+}
+$('lists').addEventListener('click',e=>{const b=e.target.closest('.car');if(!b||b.disabled)return;S.sel=S.sel===b.dataset.id?null:b.dataset.id;lists();render();const nb=document.querySelector(`.car[data-id="${b.dataset.id}"]`);if(nb)nb.focus()});
+$('modo').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.m=b.dataset.v;render()}});
+$('comb').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.f=b.dataset.v;render()}});
+['km','pel','pk','pg','pe'].forEach(id=>$(id).addEventListener('input',render));
+const fmt=v=>v?n1(v[0])+' / '+n1(v[1]):'n/d';
+$('tab').innerHTML=`<table><thead><tr><th>Modelo</th><th>Tipo</th><th>Gasolina km/l (cid./estr.)</th><th>Etanol km/l</th><th>kWh/100 km</th></tr></thead><tbody>${ALL.map(a=>`<tr><td>${esc(a.n)} ${esc(a.v)}</td><td>${TL[a.t]}</td><td>${fmt(a.g)}</td><td>${fmt(a.e)}</td><td>${fmt(a.k)}</td></tr>`).join('')}</tbody></table>`;
+lists();render();
+}
+</script>
+</body></html>
