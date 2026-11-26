@@ -51,6 +51,8 @@ select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .facts b{display:block;font:700 22px "Barlow Condensed",sans-serif;white-space:nowrap}
 .facts span{font-size:14px;color:var(--mute)}
 .note{font-size:14px;color:var(--mute);margin:0}
+.perkm{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;background:color-mix(in srgb,var(--c,var(--blue)) 12%,var(--bg));border-radius:8px;padding:10px 14px}
+.perkm b{font:700 34px/1 "Barlow Condensed",sans-serif;white-space:nowrap}
 .lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 @media(max-width:900px){.lists{grid-template-columns:minmax(0,1fr)}}
 .lists h3{font:700 22px "Barlow Condensed",sans-serif;margin:0 0 8px;color:var(--c)}
@@ -197,7 +199,7 @@ function render(){
     if(c.t==='phev')nt=`${$('pel').value}% do trajeto no elétrico e o resto a ${x.fuel}.`;
     else if(c.t==='ev')nt='Inclui 10% de perda na recarga.';
     if(S.f==='e'&&!c.e&&c.t!=='ev')nt+=' Este modelo não é flex: calculado com gasolina.';
-    r.innerHTML=`<div class="who">${esc(c.n)} <span class="note">${esc(c.v)} · ${TL[c.t]}</span></div><div class="big">${brl(x.tot)}</div><p class="note">para ${km.toLocaleString('pt-BR')} km na ${mode} · ${esc(loc().n.replace(/ \(.*\)$/,''))}</p><div class="facts">${f.map(a=>`<div><b>${esc(a[0])}</b><span>${esc(a[1])}</span></div>`).join('')}</div>${nt?`<p class="note">${esc(nt.trim())}</p>`:''}`;
+    r.innerHTML=`<div class="who">${esc(c.n)} <span class="note">${esc(c.v)} · ${TL[c.t]}</span></div><div class="big">${brl(x.tot)}</div><p class="note">para ${km.toLocaleString('pt-BR')} km na ${mode} · ${esc(loc().n.replace(/ \(.*\)$/,''))}</p><div class="facts">${f.map(a=>`<div><b>${esc(a[0])}</b><span>${esc(a[1])}</span></div>`).join('')}</div>${nt?`<p class="note">${esc(nt.trim())}</p>`:''}<div class="perkm"><b>${esc((x.tot/km).toLocaleString('pt-BR',{style:'currency',currency:'BRL',minimumFractionDigits:3,maximumFractionDigits:3}))}</b><span>por quilômetro rodado</span></div>`;
   }
   const rows=ALL.map(a=>({a,v:cost(a).tot})).sort((p,q)=>p.v-q.v),mx=rows[rows.length-1].v||1;
   $('cmps').textContent=`${loc().n.replace(/ \(.*\)$/,'')}, ${km.toLocaleString('pt-BR')} km na ${S.m==='c'?'cidade':'estrada'}, flex com ${S.f==='g'?'gasolina':'etanol'}, plug-in com ${$('pel').value}% no elétrico. Do mais barato ao mais caro.`;
