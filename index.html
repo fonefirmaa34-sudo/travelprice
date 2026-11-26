@@ -38,6 +38,9 @@ input[type=range]{flex:1;accent-color:var(--blue);height:44px}
 .prices label{font-size:14px;color:var(--mute);display:block;margin-bottom:4px}
 .money{display:flex;align-items:center;border:1px solid var(--rule);border-radius:8px;background:var(--bg);padding:0 10px;min-height:44px}
 .money span{color:var(--mute);font-size:14px;white-space:nowrap}
+select{font:600 16px Barlow,sans-serif;min-height:44px;width:100%;padding:0 12px;border-radius:8px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);cursor:pointer}
+select:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+[hidden]{display:none!important}
 .money input{border:0;background:transparent;color:var(--ink);font:16px Barlow,sans-serif;width:100%;padding:8px 6px;outline:none}
 .res{display:flex;flex-direction:column;gap:10px;border-top:6px solid var(--c,var(--blue))}
 .res .who{font:700 24px/1.15 "Barlow Condensed",sans-serif}
@@ -78,18 +81,19 @@ footer{color:var(--mute);font-size:14px;border-top:1px solid var(--rule)}
 </style></head><body>
 <header class="band"><div class="wrap">
 <h1>Quanto custa rodar com cada um dos 30 carros mais vendidos</h1>
-<p>Escolha um veículo, a quilometragem e o tipo de trajeto. Consumo oficial do Inmetro (PBEV 2026) sempre que disponível; preços de energia e combustível são editáveis.</p>
+<p>Escolha um veículo, a quilometragem e o tipo de trajeto. Consumo oficial do Inmetro (PBEV 2026) sempre que disponível; preços de energia e combustível são editáveis e podem ser trocados pelos de outras 7 cidades do mundo.</p>
 </div></header>
 <main class="band"><div class="wrap">
 <div class="top">
 <div class="box">
+<div class="ctl"><label for="loc">Local do deslocamento</label><select id="loc"></select><p class="note" id="locnote" style="margin-top:6px"></p></div>
 <div class="ctl"><span class="lbl">Trajeto</span><div class="seg" id="modo"><button type="button" id="m-cid" aria-pressed="true" data-v="c">Cidade</button><button type="button" id="m-est" aria-pressed="false" data-v="r">Estrada</button></div></div>
 <div class="ctl"><label for="km">Quilometragem rodada</label><div class="row"><input type="range" id="km" min="10" max="5000" step="10" value="1000"><span class="kmv" id="kmv">1.000 km</span></div></div>
 <div class="ctl"><span class="lbl">Preços</span><div class="prices">
 <div><label for="pk">Energia (kWh)</label><div class="money"><span>R$</span><input id="pk" type="number" inputmode="decimal" step="0.01" min="0" value="0.95"></div></div>
 <div><label for="pg">Gasolina (litro)</label><div class="money"><span>R$</span><input id="pg" type="number" inputmode="decimal" step="0.01" min="0" value="6.30"></div></div>
-<div><label for="pe">Etanol (litro)</label><div class="money"><span>R$</span><input id="pe" type="number" inputmode="decimal" step="0.01" min="0" value="4.30"></div></div>
-</div><p class="note" style="margin-top:6px">Valores de exemplo; troque pelos da sua conta de luz e do seu posto.</p></div>
+<div id="pebox"><label for="pe">Etanol (litro)</label><div class="money"><span>R$</span><input id="pe" type="number" inputmode="decimal" step="0.01" min="0" value="4.30"></div></div>
+</div><p class="note" style="margin-top:6px">Sempre em reais. Ao trocar o local, os preços daquela cidade entram já convertidos; você pode editar por cima.</p></div>
 <div class="ctl"><span class="lbl">Combustível dos carros flex</span><div class="seg" id="comb"><button type="button" id="c-g" aria-pressed="true" data-v="g">Gasolina</button><button type="button" id="c-e" aria-pressed="false" data-v="e">Etanol</button></div></div>
 <div class="ctl" id="phevbox"><label for="pel">Híbridos plug-in: parte rodada só na bateria</label><div class="row"><input type="range" id="pel" min="0" max="100" step="5" value="70"><span class="kmv" id="pelv">70%</span></div><p class="note">100% = sempre recarrega na tomada e roda no elétrico; 0% = nunca recarrega (bateria vazia, só gasolina).</p></div>
 </div>
@@ -108,6 +112,8 @@ footer{color:var(--mute);font-size:14px;border-top:1px solid var(--rule)}
 <p><b>Elétricos:</b> o Inmetro publica um consumo combinado em MJ/km (via <a href="https://mobilidadeeletrica.com.br/consumo-de-veiculos-eletricos">Mobilidade Elétrica</a>), convertido para kWh/100 km (÷ 3,6). Para separar cidade e estrada usei −8% na cidade e +12% na estrada, porque elétrico gasta menos no anda e para e mais em velocidade constante. Somei 10% de perda na recarga (da tomada para a bateria).</p>
 <p><b>Híbridos plug-in (PHEV):</b> km/l com bateria descarregada (Inmetro: <a href="https://autopapo.com.br/noticia/byd-king-consumo/">BYD King</a>; Motor1 via Recarregados: Song Pro; <a href="https://motorshow.com.br/jaecoo-7-phev-2026-avaliacao">Jaecoo 7</a> e <a href="https://motorshow.com.br/avaliacao-geely-ex5-em-i">Geely EX5 EM-i</a> via Motor Show). Consumo elétrico do Inmetro (BYD) ou medido em teste (Jaecoo, Geely). O Jetour T2 não tem número publicado que eu tenha achado: os dados dele são estimativa de um SUV PHEV desse porte.</p>
 <p><b>Versões:</b> uma versão representativa por modelo, listada abaixo do nome. O Haval H6 usa a versão HEV flex; as plug-in PHEV gastam diferente. Consumo real varia com trânsito, carga, ar-condicionado e estilo de direção.</p>
+<p><b>Preços por cidade:</b> gasolina comum e eletricidade residencial pesquisadas em 25 e 26 de novembro de 2026, convertidas pelo câmbio comercial de 25/11/2026 (<a href="https://valorfinal.com.br/cambio">ValorFinal</a>). Fora do Brasil não há etanol na bomba, então os flex rodam a gasolina. Os preços de energia são da tarifa residencial, não de carregador público, que costuma custar bem mais.</p>
+<div class="scroll" style="margin-bottom:12px"><table><thead><tr><th>Local</th><th>Gasolina / litro</th><th>Energia / kWh</th><th>Fontes e observações</th></tr></thead><tbody id="loctab"></tbody></table></div>
 <details><summary>Tabela completa dos consumos usados</summary><div class="scroll" id="tab"></div></details>
 </div></section>
 <footer class="band"><div class="wrap">Lista de veículos: os 10 mais vendidos de cada motorização de maio a outubro de 2026. Levantamento de 24 de novembro de 2026.</div></footer>
@@ -147,7 +153,19 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const n1=v=>v.toLocaleString('pt-BR',{maximumFractionDigits:1});
 const LOSS=1.10;
-let S={sel:'v0',m:'c',f:'g'};
+// Preços locais na moeda de cada lugar (g = gasolina/litro, e = etanol/litro, k = energia residencial/kWh); fx = R$ por unidade em 25/11/2026
+const LOC=[
+{id:'br',n:'Brasil (valores de exemplo)',cur:'BRL',fx:1,g:6.30,e:4.30,k:0.95,src:'Valores de exemplo do painel; troque pelos do seu posto e da sua conta de luz.'},
+{id:'mia',n:'Miami, EUA',cur:'USD',fx:5.8920,g:0.924,k:0.133,src:'Gasolina: AAA, média regular da região de Miami em 25/11/2026 (US$ 3,50 por galão). Energia: FPL, tarifa RS-1 de outubro/2026 (US$ 133,10 por 1.000 kWh, sem impostos locais).',u:['https://gasprices.aaa.com/?state=FL','https://www.fpl.com/content/dam/fplgp/us/en/rates/pdf/residential-rates-oct2026.pdf']},
+{id:'sha',n:'Xangai, China',cur:'CNY',fx:0.88439,g:8.33,k:0.617,src:'Gasolina 92: ¥ 8,85 desde 29/10/2026 menos o corte de ¥ 0,52 de 13/11/2026 (estimado a partir das duas notícias). Energia: tarifa residencial de 1ª faixa de Xangai.',u:['https://m.gmw.cn/2026-10/29/content_1304580702.htm','https://cj.sina.com.cn/articles/view/4002442739/ee906df307201b86s','https://china.huanqiu.com/article/4HkWitDjGBx']},
+{id:'bue',n:'Buenos Aires, Argentina',cur:'ARS',fx:0.003654,g:2049,k:161.16,src:'Gasolina: YPF Nafta Súper, NaftaHoy em 25/11/2026. Energia: Edesur R1 sem subsídio, novembro/2026, sem impostos nem cargo fixo.',u:['https://naftahoy.com/','https://www.zonanortehoy.com/economia/aumentan-la-luz-y-el-gas-en-noviembre-2026-cuanto-se-paga-y-quienes-mantienen-los-subsidios/']},
+{id:'par',n:'Paris, França',cur:'EUR',fx:6.4571,g:1.992,k:0.2001,src:'Gasolina: SP95-E10, média nacional em 18/11/2026. Energia: EDF Tarif Bleu Base 6 kVA desde 01/08/2026, com impostos.',u:['https://media.roole.fr/quotidien/au-volant/prix-des-carburants-voici-les-tarifs-en-france-ce-mercredi-18-novembre-2026','https://selectra.info/energie/actualites/marche/nouveaux-prix-electricite-tarif-bleu-1er-aout-2026']},
+{id:'mad',n:'Madri, Espanha',cur:'EUR',fx:6.4571,g:1.676,k:0.22,src:'Gasolina 95: média da Espanha em 09/11/2026. Energia: PVPC médio de 17/11/2026 (€ 0,175 sem impostos) mais imposto elétrico e IVA de 21%.',u:['https://www.democrata.es/economia/precio-gasolina-hoy-9-noviembre-2026/','https://selectra.es/energia/noticias/precio-luz/2026-11-17']},
+{id:'dxb',n:'Dubai, Emirados Árabes',cur:'AED',fx:1.6064,g:4.04,k:0.3045,src:'Gasolina: Special 95, preço oficial de novembro/2026. Energia: DEWA, faixa até 2.000 kWh (23 fils) mais sobretaxa de combustível (6 fils) e 5% de IVA.',u:['https://www.khaleejtimes.com/business/energy/uae-petrol-diesel-prices-november-2026-announced','https://dewa.gov.ae/en/consumer/billing/slab-tariff']},
+{id:'cai',n:'Cairo, Egito',cur:'EGP',fx:0.10803,g:22.25,k:1.74,src:'Gasolina 92: preço oficial desde outubro/2026, mantido até dezembro. Energia: faixa residencial de 201 a 350 kWh por mês (onde cai uma casa que carrega um carro), desde agosto/2026.',u:['https://english.ahram.org.eg/News/580080.aspx','https://enterpriseam.com/egypt/2026/08/02/household-electricity-tariffs-hiked-by-an-average-of-12/']}];
+const money=(v,cur)=>v.toLocaleString('pt-BR',{style:'currency',currency:cur,maximumFractionDigits:cur==='ARS'||cur==='EGP'?2:3});
+const loc=()=>LOC.find(l=>l.id===S.loc)||LOC[0];
+let S={sel:'v0',m:'c',f:'g',loc:'br'};
 try{const s=JSON.parse(localStorage.getItem('custo-desloc')||'null');if(s)Object.assign(S,s)}catch(e){}
 const num=id=>Math.max(0,parseFloat($(id).value)||0);
 function cost(c){
@@ -174,24 +192,38 @@ function render(){
     if(x.l)f.push([n1(x.l)+' L',x.fuel]);
     if(x.kw)f.push([n1(x.kw)+' kWh/100 km','consumo na bateria, '+mode]);
     if(x.kml)f.push([n1(x.kml)+' km/l',x.fuel+', '+mode]);
+    const lc=loc();if(lc.cur!=='BRL')f.splice(1,0,[(x.tot/lc.fx).toLocaleString('pt-BR',{style:'currency',currency:lc.cur}),'total em moeda local']);
     let nt='';
     if(c.t==='phev')nt=`${$('pel').value}% do trajeto no elétrico e o resto a ${x.fuel}.`;
     else if(c.t==='ev')nt='Inclui 10% de perda na recarga.';
     if(S.f==='e'&&!c.e&&c.t!=='ev')nt+=' Este modelo não é flex: calculado com gasolina.';
-    r.innerHTML=`<div class="who">${esc(c.n)} <span class="note">${esc(c.v)} · ${TL[c.t]}</span></div><div class="big">${brl(x.tot)}</div><p class="note">para ${km.toLocaleString('pt-BR')} km na ${mode}</p><div class="facts">${f.map(a=>`<div><b>${esc(a[0])}</b><span>${esc(a[1])}</span></div>`).join('')}</div>${nt?`<p class="note">${esc(nt.trim())}</p>`:''}`;
+    r.innerHTML=`<div class="who">${esc(c.n)} <span class="note">${esc(c.v)} · ${TL[c.t]}</span></div><div class="big">${brl(x.tot)}</div><p class="note">para ${km.toLocaleString('pt-BR')} km na ${mode} · ${esc(loc().n.replace(/ \(.*\)$/,''))}</p><div class="facts">${f.map(a=>`<div><b>${esc(a[0])}</b><span>${esc(a[1])}</span></div>`).join('')}</div>${nt?`<p class="note">${esc(nt.trim())}</p>`:''}`;
   }
   const rows=ALL.map(a=>({a,v:cost(a).tot})).sort((p,q)=>p.v-q.v),mx=rows[rows.length-1].v||1;
-  $('cmps').textContent=`${km.toLocaleString('pt-BR')} km na ${S.m==='c'?'cidade':'estrada'}, flex com ${S.f==='g'?'gasolina':'etanol'}, plug-in com ${$('pel').value}% no elétrico. Do mais barato ao mais caro.`;
+  $('cmps').textContent=`${loc().n.replace(/ \(.*\)$/,'')}, ${km.toLocaleString('pt-BR')} km na ${S.m==='c'?'cidade':'estrada'}, flex com ${S.f==='g'?'gasolina':'etanol'}, plug-in com ${$('pel').value}% no elétrico. Do mais barato ao mais caro.`;
   $('cmp').innerHTML=rows.map(o=>`<li class="${o.a.cls}${o.a.id===S.sel?' me':''}"><span class="nm">${esc(o.a.n)}</span><span class="bar"><i style="width:${(o.v/mx*100).toFixed(1)}%"></i></span><span class="v">${brl(o.v)}</span></li>`).join('');
   try{localStorage.setItem('custo-desloc',JSON.stringify(S))}catch(e){}
 }
 $('lists').addEventListener('click',e=>{const b=e.target.closest('.car');if(!b||b.disabled)return;S.sel=S.sel===b.dataset.id?null:b.dataset.id;lists();render();const nb=document.querySelector(`.car[data-id="${b.dataset.id}"]`);if(nb)nb.focus()});
 $('modo').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.m=b.dataset.v;render()}});
-$('comb').addEventListener('click',e=>{const b=e.target.closest('button');if(b){S.f=b.dataset.v;render()}});
+$('comb').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&!b.disabled){S.f=b.dataset.v;render()}});
+function setLoc(id){
+  S.loc=id;const l=loc();
+  $('pk').value=(l.k*l.fx).toFixed(2);$('pg').value=(l.g*l.fx).toFixed(2);
+  if(l.e!=null)$('pe').value=(l.e*l.fx).toFixed(2);else S.f='g';
+  $('pebox').hidden=l.e==null;$('c-e').disabled=l.e==null;
+  $('locnote').textContent=l.cur==='BRL'?l.src:`Gasolina ${money(l.g,l.cur)}/L e energia ${money(l.k,l.cur)}/kWh. Câmbio de 25/11/2026: 1 ${l.cur} = R$ ${l.fx.toLocaleString('pt-BR',{maximumFractionDigits:4})}. Sem etanol: flex rodam a gasolina.`;
+  render();
+}
+$('loc').innerHTML=LOC.map(l=>`<option value="${l.id}">${esc(l.n)}</option>`).join('');
+$('loc').addEventListener('change',e=>setLoc(e.target.value));
+$('loctab').innerHTML=LOC.map(l=>`<tr><td>${esc(l.n)}</td><td>${l.cur==='BRL'?'':esc(money(l.g,l.cur))+' ≈ '}${brl(l.g*l.fx)}</td><td>${l.cur==='BRL'?'':esc(money(l.k,l.cur))+' ≈ '}${brl(l.k*l.fx)}</td><td style="white-space:normal;text-align:left;min-width:22em">${esc(l.src)}${(l.u||[]).map((u,i)=>` <a href="${esc(u)}">[${i+1}]</a>`).join('')}</td></tr>`).join('');
 ['km','pel','pk','pg','pe'].forEach(id=>$(id).addEventListener('input',render));
 const fmt=v=>v?n1(v[0])+' / '+n1(v[1]):'n/d';
 $('tab').innerHTML=`<table><thead><tr><th>Modelo</th><th>Tipo</th><th>Gasolina km/l (cid./estr.)</th><th>Etanol km/l</th><th>kWh/100 km</th></tr></thead><tbody>${ALL.map(a=>`<tr><td>${esc(a.n)} ${esc(a.v)}</td><td>${TL[a.t]}</td><td>${fmt(a.g)}</td><td>${fmt(a.e)}</td><td>${fmt(a.k)}</td></tr>`).join('')}</tbody></table>`;
-lists();render();
+if(!LOC.some(l=>l.id===S.loc))S.loc='br';
+$('loc').value=S.loc;
+lists();setLoc(S.loc);
 }
 </script>
 </body></html>
